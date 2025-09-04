@@ -1,27 +1,10 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "NexProtect.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/takephoto",
-      "dest": "/NexProtect.js"
-    },
-    {
-      "src": "/hit",
-      "dest": "/NexProtect.js"
-    },
-    {
-      "src": "/stats",
-      "dest": "/NexProtect.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/NexProtect/$1"
-    }
-  ]
+	"version": 2,
+	"builds": [{ "src": "NexProtect.js", "use": "@vercel/node" }],
+	"routes": [
+	  {
+		  "src": "/(.*)",
+		  "dest": "NexProtect.js"
+	  }
+	]	
 }
