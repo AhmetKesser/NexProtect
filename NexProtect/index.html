@@ -1,93 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>NexProtect - Request Statistics</title>
+    <title>İstek Grafiği</title>
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        #container {
-            height: 400px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
+        body { font-family: Arial, sans-serif; background: #111; color: #fff; }
+        #container { width: 90%; height: 500px; margin: 50px auto; }
     </style>
 </head>
 <body>
-    <h1>Website Request Statistics</h1>
+    <h1>Siteye Gelen İstekler</h1>
     <div id="container"></div>
 
     <script>
-        // Initialize the chart
-        const chart = Highcharts.chart('container', {
-            chart: {
-                type: 'line',
-                animation: {
-                    duration: 1000 // Smooth transition for updates
-                }
-            },
-            title: {
-                text: 'Requests per Minute'
-            },
-            xAxis: {
-                categories: [],
-                title: {
-                    text: 'Time'
-                }
-            },
-            yAxis: {
-                title: {
-                    text: 'Number of Requests'
+        async function fetchData() {
+            const res = await fetch("/api/requests");
+            const data = await res.json();
+
+            // Data formatla
+            const seriesData = data.map(d => ({
+                x: new Date(d.time).getTime(),
+                y: d.status === 404 ? 1 : 0, // 1 = 404, 0 = başarılı
+                url: d.url,
+                method: d.method,
+                status: d.status
+            }));
+
+            Highcharts.chart('container', {
+                chart: { type: 'scatter', zoomType: 'x' },
+                title: { text: 'Yanlış / Başarılı İstekler' },
+                xAxis: { type: 'datetime', title: { text: 'Zaman' } },
+                yAxis: { title: { text: 'Durum' }, categories: ['Başarılı', '404 Hata'] },
+                tooltip: {
+                    formatter: function() {
+                        return `URL: ${this.point.url}<br>Method: ${this.point.method}<br>Status: ${this.point.status}<br>Zaman: ${Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x)}`;
+                    }
                 },
-                min: 0
-            },
-            series: [{
-                name: 'Requests',
-                data: [],
-                lineWidth: 2, // Ensure line is visible
-                color: '#0066cc' // Distinct color for visibility
-            }],
-            credits: {
-                enabled: false
-            }
-        });
-
-        async function fetchStats() {
-            try {
-                const response = await fetch('/stats');
-                const data = await response.json();
-
-                // Ensure data is valid before updating
-                if (data.timestamps && data.counts && data.timestamps.length > 0) {
-                    // Update chart with new data
-                    chart.update({
-                        xAxis: {
-                            categories: data.timestamps
-                        },
-                        series: [{
-                            data: data.counts
-                        }]
-                    }, true, true); // Redraw with animation
-                }
-            } catch (error) {
-                console.error('Error fetching stats:', error);
-            }
+                series: [{
+                    name: 'İstek Durumu',
+                    data: seriesData
+                }]
+            });
         }
 
-        // Initial fetch
-        fetchStats();
-        
-        // Update every 10 seconds
-        setInterval(fetchStats, 1000);
+        // Her 5 saniyede güncelle
+        fetchData();
+        setInterval(fetchData, 1000);
     </script>
 </body>
 </html>
