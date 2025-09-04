@@ -3,11 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <title>NexProtect - Dstat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
-  <h1>📊 Dstat (Canlı İstek Grafiği)</h1>
-  <canvas id="reqChart" width="800" height="400"></canvas>
+<body class="bg-gray-100 text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-blue-600 text-white p-4 shadow-md">
+    <h1 class="text-2xl font-bold text-center">📊 NexProtect Dstat</h1>
+    <p class="text-center text-sm opacity-80">Canlı HTTP istek takibi</p>
+  </header>
+
+  <!-- Container -->
+  <main class="max-w-5xl mx-auto p-6">
+    <div class="bg-white rounded-2xl shadow-lg p-6">
+      <h2 class="text-xl font-semibold mb-4">Son 10 Saniyelik İstek Grafiği</h2>
+      <canvas id="reqChart" class="w-full h-80"></canvas>
+    </div>
+  </main>
 
   <script>
     const ctx = document.getElementById('reqChart').getContext('2d');
@@ -18,16 +31,33 @@
         datasets: [{
           label: "İstek Sayısı",
           data: [],
-          borderColor: "blue",
-          backgroundColor: "rgba(0,0,255,0.3)"
+          borderColor: "rgb(59, 130, 246)", // Tailwind Blue-500
+          backgroundColor: "rgba(59, 130, 246, 0.3)",
+          borderWidth: 2,
+          tension: 0.3,
+          fill: true,
+          pointRadius: 4,
+          pointBackgroundColor: "rgb(37, 99, 235)" // Tailwind Blue-600
         }]
       },
       options: {
         responsive: true,
         animation: false,
+        plugins: {
+          legend: { display: true, labels: { color: "#374151" } }
+        },
         scales: {
-          x: { title: { display: true, text: "Zaman" }},
-          y: { title: { display: true, text: "İstek Sayısı" }, beginAtZero: true }
+          x: {
+            title: { display: true, text: "Zaman", color: "#374151" },
+            ticks: { color: "#6B7280" },
+            grid: { color: "#E5E7EB" }
+          },
+          y: {
+            title: { display: true, text: "İstek Sayısı", color: "#374151" },
+            beginAtZero: true,
+            ticks: { color: "#6B7280" },
+            grid: { color: "#E5E7EB" }
+          }
         }
       }
     });
@@ -36,7 +66,6 @@
       const res = await fetch("/api/stats");
       const data = await res.json();
 
-      // Son 10 saniyeyi grupla
       const now = Date.now();
       const buckets = [];
       for (let i = 10; i >= 0; i--) {
@@ -50,7 +79,8 @@
       reqChart.update();
     }
 
-    setInterval(updateChart, 1);
+    setInterval(updateChart, 1000);
   </script>
+
 </body>
 </html>
