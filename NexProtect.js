@@ -5,7 +5,7 @@ const App = Express();
 const Port = 3000;
 
 App.use((req, res, next) => {
-    if (req.httpVersion !== '2.0') {
+    if (req.httpVersion !== '4.0') {
         return res.redirect(301, 'https://www.google.com');
     }
     next();
