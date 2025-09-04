@@ -3,35 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dstat Monitor</title>
+  <title>Anlık Ziyaretçi</title>
   <script src="https://code.highcharts.com/highcharts.js"></script>
 </head>
 <body>
-  <h1>Site İstek Grafiği</h1>
+  <h1>Anlık Ziyaretçi Sayısı</h1>
   <div id="container" style="height: 400px;"></div>
 
   <script>
     let chart = Highcharts.chart('container', {
       chart: { type: 'line' },
-      title: { text: 'Gelen İstekler' },
+      title: { text: 'Son 30 Saniyedeki Ziyaretçiler' },
       xAxis: { type: 'datetime', title: { text: 'Zaman' } },
-      yAxis: { title: { text: 'İstek Sayısı' } },
+      yAxis: { title: { text: 'Ziyaretçi Sayısı' } },
       series: [{
-        name: 'İstek',
+        name: 'Ziyaretçi',
         data: []
       }]
     });
 
-    // Her 2 saniyede bir serverdan veri al
+    // Her 2 saniyede bir anlık ziyaretçi sayısını al
     setInterval(async () => {
-      const res = await fetch('/api/requests');
+      const res = await fetch('/api/active');
       const data = await res.json();
 
-      const x = data.timestamp;
-      const y = data.count;
+      const x = Date.now();
+      const y = data.active;
 
       chart.series[0].addPoint([x, y], true, chart.series[0].data.length > 20);
-    }, 500);
+    }, 1000);
   </script>
 </body>
 </html>
