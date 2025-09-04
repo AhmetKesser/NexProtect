@@ -7,7 +7,7 @@ const path = require('path');
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static('NexProtect'));
 
 const BLACKLISTED_IPS = new Set();
 let totalRequests = 0;
@@ -118,7 +118,7 @@ app.get('/hit', hitDDoSProtect, (req, res) => {
 
 // Homepage
 app.get('/', blacklistCheck, strictDDoSProtect, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'NexProtect', 'index.html'));
 });
 
 // Stats
