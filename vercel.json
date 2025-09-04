@@ -1,0 +1,10 @@
+{
+	"version": 2,
+	"builds": [{ "src": "NexProtect.js", "use": "@vercel/node" }],
+	"routes": [
+	  {
+		  "src": "/(.*)",
+		  "dest": "NexProtect.js"
+	  }
+	]	
+}
