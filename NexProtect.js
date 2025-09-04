@@ -1,22 +1,27 @@
-const Express = require("express");
-const Path = require("path");
-const App = Express();
+const express = require("express");
+const path = require("path");
 
-const Port = 3000;
+const app = express();
+const port = 3000;
 
-App.use(Express.static(Path.join(__dirname, "NexProtect")));
+// Statik dosyalar
+app.use(express.static(path.join(__dirname, "NexProtect")));
 
-App.use((Req, Res, Next) => {
-    if (Req.httpVersionMajor !== 4) {
-        return Res.redirect("https://google.com");
+// Ana sayfa
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "NexProtect", "index.html"));
+});
+
+// HTTP/2 harici yönlendirme
+app.use((req, res, next) => {
+    // req.httpVersionMajor ile protokolü öğrenebiliriz
+    // HTTP/2 ise 2, HTTP/1.1 ise 1
+    if (req.httpVersionMajor !== 4) {
+        return res.redirect("https://google.com");
     }
-    Next();
+    next();
 });
 
-App.get("/", (Req, Res) => {
-    Res.sendFile(Path.join(__dirname, "NexProtect", "index.html"));
-});
-
-App.listen(Port, () => {
-    console.log(`OK !`);
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
