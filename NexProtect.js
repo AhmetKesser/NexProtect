@@ -1,36 +1,30 @@
-const Express = require("express");
-const Path = require("path");
-const App = Express();
-const Port = 3000;
+const express = require("express");
+const path = require("path");
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-// İstek kayıtları tutulacak
-let requests = [];
+// Memory'de toplam istek sayısı
+let totalRequests = 0;
 
 // Statik dosyalar
-App.use(Express.static(Path.join(__dirname, "NexProtect")));
+app.use(express.static(path.join(__dirname, "NexProtect")));
 
-// Her isteği yakala
-App.use((req, res, next) => {
-    requests.push({
-        url: req.originalUrl,
-        time: Date.now()
-    });
-
-    // 1 dakikadan eski verileri temizle (hafızayı şişirmesin)
-    requests = requests.filter(r => r.time > Date.now() - 60 * 1000);
-    next();
+// Her isteği say
+app.use((req, res, next) => {
+  totalRequests++;
+  next();
 });
 
-// API endpoint: frontend buradan çekecek
-App.get("/api/stats", (req, res) => {
-    res.json(requests);
+// API endpoint: frontend buradan veriyi çekecek
+app.get("/api/stats", (req, res) => {
+  res.json({ totalRequests });
 });
 
 // Ana sayfa
-App.get("/", (req, res) => {
-    res.sendFile(Path.join(__dirname, "NexProtect", "index.html"));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "NexProtect", "index.html"));
 });
 
-App.listen(Port, () => {
-    console.log(`OK ! http://localhost:${Port}`);
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
 });
