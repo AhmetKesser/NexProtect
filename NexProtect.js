@@ -7,12 +7,17 @@ const PORT = 3000;
 // Statik dosyalar
 app.use(express.static(path.join(__dirname, "NexProtect")));
 
-// İstek sayısı tutma
-let requestCount = 0;
+// Son 30 saniye istek zamanlarını tut
+let requestTimes = [];
 
-// Her istekte sayıyı artır
+// Her istekte zaman damgası ekle
 app.use((req, res, next) => {
-  requestCount++;
+  const now = Date.now();
+  requestTimes.push(now);
+
+  // 30 saniyeden eski kayıtları temizle
+  requestTimes = requestTimes.filter(ts => now - ts <= 30000);
+
   next();
 });
 
@@ -21,9 +26,9 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "NexProtect", "index.html"));
 });
 
-// API endpoint: İstek sayısını döner
-app.get("/api/requests", (req, res) => {
-  res.json({ count: requestCount, timestamp: Date.now() });
+// Anlık ziyaretçi sayısı
+app.get("/api/active", (req, res) => {
+  res.json({ active: requestTimes.length });
 });
 
 app.listen(PORT, () => {
