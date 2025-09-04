@@ -1,85 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Yakuza - DSTAT</title>
-  <style>
-    html,
-    body {
-      background: #000000 url("./style/img/bg.gif");
-      height: 100%;
-      margin: 0;
-    }
-
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-    }
-
-    body>div {
-      width: 100%;
-    }
-
-    #chart {
-      width: 80%;
-      margin: auto;
-      border: 1px solid #0f0;
-    }
-  </style>
-</head>
-
-<body>
-  <div>
-    <div id="chart"></div>
-  </div>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dstat Monitor</title>
   <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <h1>Site İstek Grafiği</h1>
+  <div id="container" style="height: 400px;"></div>
+
   <script>
-    window.onload = () => {
-      let previous = null;
+    const socket = io();
 
-      const charts = Highcharts.chart("chart", {
-        chart: { type: "area", backgroundColor: "transparent" },
-        title: { text: "L7 DSTAT", style: { color: "#0f0" } },
-        xAxis: { type: "datetime" },
-        yAxis: {
-          labels: { style: { color: "#0f0" } },
-          title: { text: "Requests / Sec", style: { color: "#0f0" } }
-        },
-        credits: { enabled: false },
-        series: [{ type: "area", name: "Total Requests", color: "#0f0", data: [] }],
-      });
+    let chart = Highcharts.chart('container', {
+      chart: { type: 'line' },
+      title: { text: 'Gelen İstekler' },
+      xAxis: { type: 'datetime', title: { text: 'Zaman' } },
+      yAxis: { title: { text: 'İstek Sayısı' } },
+      series: [{
+        name: 'İstek',
+        data: []
+      }]
+    });
 
-      async function getData() {
-        try {
-          const res = await fetch("/api/stats", { cache: "no-cache" });
-          const data = await res.json();
+    socket.on('update', (count) => {
+      const x = (new Date()).getTime();
+      const y = count;
 
-          const current = data.totalRequests;
-          const series = charts.series[0];
-
-          if (previous !== null) {
-            const diff = current - previous;
-            const shift = series.data.length > 40;
-            series.addPoint([Date.now(), diff], true, shift);
-          }
-
-          previous = current;
-          setTimeout(getData, 1000);
-
-        } catch (err) {
-          console.log(err);
-          setTimeout(getData, 2000);
-        }
-      }
-
-      getData();
-    };
+      chart.series[0].addPoint([x, y], true, chart.series[0].data.length > 20);
+    });
   </script>
 </body>
-
 </html>
