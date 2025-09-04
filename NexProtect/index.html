@@ -1,52 +1,11 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>İstek Grafiği</title>
-    <script src="https://code.highcharts.com/highcharts.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; background: #111; color: #fff; }
-        #container { width: 90%; height: 500px; margin: 50px auto; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello !</title>
 </head>
 <body>
-    <h1>Siteye Gelen İstekler</h1>
-    <div id="container"></div>
-
-    <script>
-        async function fetchData() {
-            const res = await fetch("/api/requests");
-            const data = await res.json();
-
-            // Data formatla
-            const seriesData = data.map(d => ({
-                x: new Date(d.time).getTime(),
-                y: d.status === 404 ? 1 : 0, // 1 = 404, 0 = başarılı
-                url: d.url,
-                method: d.method,
-                status: d.status
-            }));
-
-            Highcharts.chart('container', {
-                chart: { type: 'scatter', zoomType: 'x' },
-                title: { text: 'Yanlış / Başarılı İstekler' },
-                xAxis: { type: 'datetime', title: { text: 'Zaman' } },
-                yAxis: { title: { text: 'Durum' }, categories: ['Başarılı', '404 Hata'] },
-                tooltip: {
-                    formatter: function() {
-                        return `URL: ${this.point.url}<br>Method: ${this.point.method}<br>Status: ${this.point.status}<br>Zaman: ${Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x)}`;
-                    }
-                },
-                series: [{
-                    name: 'İstek Durumu',
-                    data: seriesData
-                }]
-            });
-        }
-
-        // Her 5 saniyede güncelle
-        fetchData();
-        setInterval(fetchData, 1000);
-    </script>
+    <h1>Hello !</h1>
 </body>
 </html>
