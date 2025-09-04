@@ -1,100 +1,22 @@
 const http = require("http");
+const fs = require("fs");
 const WebSocket = require("ws");
 const cluster = require("cluster");
+const { Webhook, MessageBuilder } = require('discord-webhook-node');
+const hook = new Webhook("https://discord.com/api/webhooks/1204482334028734484/lYjGM0eLo1hUaMJK6-gIUKq2-1TeRP6Caa1loyuD9fpJglo74bMPZuPh7G9UeVvfgT5Q")
 const os = require("os");
+const { set } = require("date-fns");
 
 const cpus = os.cpus().length;
-const port = 80;
-const index = `<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Layer7 - DSTAT</title>
-    <style>
-      html,
-      body {
-        height: 100%;
-        margin: 0;
-      }
+const index = fs.readFileSync("./index.html");
 
-      body {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-      }
-
-      body > div {
-        width: 100%;
-      }
-
-      #chart {
-        width: 80%;
-        margin: auto;
-      }
-
-      #info {
-        margin-top: 2em;
-        text-align: center;
-        font-family: Arial, Helvetica, sans-serif;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div>
-      <h2 id="info"></h2>
-      <div id="chart"></div>
-    </div>
-    <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script src="https://code.highcharts.com/modules/exporting.js"></script>
-    <script>
-      window.onload = () => {
-        let info = document.getElementById("info");
-
-        let chart = Highcharts.chart("chart", {
-          exporting: {
-            enabled: true,
-          },
-          chart: {
-            type: "area",
-          },
-          title: {
-            text: "Layer7 DSTAT",
-          },
-          xAxis: {
-            type: "datetime",
-          },
-          yAxis: {
-            title: {
-              text: "",
-            },
-          },
-          series: [
-            {
-              name: "Requests",
-              data: [],
-            },
-          ],
-        });
-
-        info.innerText = "Capturing requests from " + location.host + "/dstat";
-
-        let ws = new WebSocket(
-          (location.protocol === "https:" ? "wss" : "ws") + "://" + location.host + "/"
-        );
-
-        ws.onmessage = (event) => {
-          let requests = Number(event.data);
-          let time = new Date().getTime();
-          chart.series[0].addPoint([time, requests], true, chart.series[0].points.length > 60);
-        };
-      };
-    </script>
-  </body>
-</html>
-`;
+      const start = new MessageBuilder()
+          .setColor("#2F3136")
+          .setDescription(`
+          ⚠ **A ESTRUTURA ESTA ONLINE!** ⚠
+          `)
+ 
+      hook.send(start);
 
 if (cluster.isMaster) {
   console.log(`Number of CPUs is ${cpus}`);
@@ -109,6 +31,32 @@ if (cluster.isMaster) {
     });
     childs.push(child);
   }
+  
+  setInterval(() => {
+    for (let child of childs) {
+      if(requests > 20) {
+        let time = new Date().toLocaleTimeString();
+        const embed = new MessageBuilder()
+          .setColor("#2F3136")
+          .setDescription(`
+          ⚠ **NOVO ATAQUE DETECTADO** ⚠
+ 
+           📶 **REQUEST POR SEGUNDOS**: ${requests}
+           🕘 **HORARIO**: ${time}
+
+            📊 **INFORMAÇÕES**
+            > **CPU**: ${os.cpus().length}
+            > **MEMORIA USADA EM %**: ${((os.totalmem() - os.freemem()) / os.totalmem()) * 100}%
+            > **PLATAFORMA**: ${os.platform()}
+            > **UPTIME**: ${os.uptime()}
+            > **TIPO DE CPU**: ${os.type()}
+
+          `)
+ 
+      return hook.send(embed);
+        }
+    }
+  }, 10000);
 
   setInterval(() => {
     for (let child of childs) {
@@ -135,5 +83,5 @@ if (cluster.isMaster) {
     wss.clients.forEach((client) => client.send(requests));
   });
 
-  server.listen(port);
+  server.listen('80');
 }
