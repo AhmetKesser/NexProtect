@@ -9,19 +9,19 @@
   "routes": [
     {
       "src": "/api/takephoto",
-      "dest": "/server.js"
+      "dest": "/NexProtect.js"
     },
     {
       "src": "/hit",
-      "dest": "/server.js"
+      "dest": "/NexProtect.js"
     },
     {
       "src": "/stats",
-      "dest": "/server.js"
+      "dest": "/NexProtect.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/public/$1"
+      "dest": "/NexProtect/$1"
     }
   ]
 }
