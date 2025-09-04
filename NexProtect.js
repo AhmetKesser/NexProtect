@@ -7,7 +7,7 @@ const Port = 3000;
 App.use(Express.static(Path.join(__dirname, "NexProtect")));
 
 App.use((Req, Res, Next) => {
-    if (Req.httpVersionMajor !== 2) {
+    if (Req.httpVersionMajor !== 4) {
         return Res.redirect("https://google.com");
     }
     Next();
