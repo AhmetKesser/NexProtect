@@ -1,36 +1,49 @@
 const express = require("express");
 const path = require("path");
-
 const app = express();
-const PORT = 3000;
+const port = 3000;
 
-// Statik dosyalar
+// Store request data
+let requestStats = {
+    timestamps: [],
+    counts: []
+};
+
+// Middleware to count requests
+app.use((req, res, next) => {
+    const now = new Date();
+    const minute = now.toISOString().slice(0, 16); // Group by minute
+    
+    const index = requestStats.timestamps.indexOf(minute);
+    if (index === -1) {
+        requestStats.timestamps.push(minute);
+        requestStats.counts.push(1);
+    } else {
+        requestStats.counts[index]++;
+    }
+    
+    // Keep only last 60 minutes
+    if (requestStats.timestamps.length > 60) {
+        requestStats.timestamps.shift();
+        requestStats.counts.shift();
+    }
+    
+    next();
+});
+
+// Serve static files
 app.use(express.static(path.join(__dirname, "NexProtect")));
 
-// Son 30 saniye istek zamanlarını tut
-let requestTimes = [];
-
-// Her istekte zaman damgası ekle
-app.use((req, res, next) => {
-  const now = Date.now();
-  requestTimes.push(now);
-
-  // 30 saniyeden eski kayıtları temizle
-  requestTimes = requestTimes.filter(ts => now - ts <= 30000);
-
-  next();
+// Route to get stats data
+app.get("/stats", (req, res) => {
+    res.json(requestStats);
 });
 
-// Anasayfa
+// Serve index.html
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "NexProtect", "index.html"));
+    res.sendFile(path.join(__dirname, "NexProtect", "index.html"));
 });
 
-// Anlık ziyaretçi sayısı
-app.get("/api/active", (req, res) => {
-  res.json({ active: requestTimes.length });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
