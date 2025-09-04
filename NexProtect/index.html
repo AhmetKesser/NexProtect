@@ -5,15 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dstat Monitor</title>
   <script src="https://code.highcharts.com/highcharts.js"></script>
-  <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
   <h1>Site İstek Grafiği</h1>
   <div id="container" style="height: 400px;"></div>
 
   <script>
-    const socket = io();
-
     let chart = Highcharts.chart('container', {
       chart: { type: 'line' },
       title: { text: 'Gelen İstekler' },
@@ -25,12 +22,16 @@
       }]
     });
 
-    socket.on('update', (count) => {
-      const x = (new Date()).getTime();
-      const y = count;
+    // Her 2 saniyede bir serverdan veri al
+    setInterval(async () => {
+      const res = await fetch('/api/requests');
+      const data = await res.json();
+
+      const x = data.timestamp;
+      const y = data.count;
 
       chart.series[0].addPoint([x, y], true, chart.series[0].data.length > 20);
-    });
+    }, 2000);
   </script>
 </body>
 </html>
